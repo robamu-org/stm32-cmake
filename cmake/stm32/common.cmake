@@ -10,6 +10,12 @@ foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
 
+if(DEFINED ENV{STM32_TOOLCHAIN_PATH})
+    message(STATUS "Detected toolchain path STM32_TOOLCHAIN_PATH in environmental variables: ")
+    message(STATUS "$ENV{STM32_TOOLCHAIN_PATH}")
+    set(STM32_TOOLCHAIN_PATH $ENV{STM32_TOOLCHAIN_PATH})
+endif()
+
 if(NOT STM32_TOOLCHAIN_PATH)
     if(NOT CMAKE_C_COMPILER)
         set(STM32_TOOLCHAIN_PATH "/usr")
@@ -48,6 +54,15 @@ function(stm32_print_size_of_target TARGET)
        POST_BUILD
        COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
        COMMENT "Target Sizes: "
+    )
+endfunction()
+
+function(stm32_generate_binary_file TARGET)
+    add_custom_command(
+        TARGET ${TARGET}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.bin
+        COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
     )
 endfunction()
 

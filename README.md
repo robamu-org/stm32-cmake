@@ -35,7 +35,9 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 # Usage
 
 First of all you need to configure toolchain and library pathes using CMake varibles. 
-You can do this by passing values through command line during cmake run or by setting variables inside your CMakeLists.txt
+You can do this by passing values through command line during cmake run or by setting variables
+inside your CMakeLists.txt. You can also set pass these variables to CMake by setting them
+as environmental variables.
 
 ## Configuration
 
@@ -78,7 +80,8 @@ CMSIS creates following targets:
 * `CMSIS::STM32::<TYPE>` (e.g. `CMSIS::STM32::F407xx`) - common startup source for device type, depends on `CMSIS::STM32::<FAMILY>`
 * `CMSIS::STM32::<DEVICE>` (e.g. `CMSIS::STM32::F407VG`) - linker script for device, depends on `CMSIS::STM32::<TYPE>`
 
-So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
+So, if you don't need the linker script or want to adapt it for your own needs, you can link
+only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
 
 ***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
@@ -107,7 +110,7 @@ HAL module will search all drivers supported by family and create following targ
 
 ***Note**: Targets for STM32H7 will look like `HAL::STM32::<FAMILY>::[M7|M4]`, `HAL::STM32::<FAMILY>::[M7|M4]::<DRIVER>`, etc.*
 
-Here is typical usage:
+Here is typical usage for a F4 device:
 
 ```
 add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
@@ -120,12 +123,27 @@ target_link_libraries(stm32-blinky-f4
 )
 ```
 
+Here is another usage for a H7 device with the M7 core:
+
+```
+target_link_libraries(stm32-freertos PRIVATE
+    HAL::STM32::H7::M7::RCC
+    HAL::STM32::H7::M7::GPIO
+    HAL::STM32::H7::M7::CORTEX
+    CMSIS::STM32::H743ZI::M7
+    STM32::NoSys
+)
+```
+
 ### Building
 
 ```
     $ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
     $ make
 ```
+
+You can also ommit the `-DCMAKE_TOOLCHAIN_FILE` argument and use `set (CMAKE_TOOLCHAIN_FILE ...)`
+in your `CMakeLists.txt` file
 
 ## Linker script & variables
 
@@ -136,6 +154,7 @@ CMSIS package will generate linker script for your device automatically (target 
 * `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
 * `stm32_print_size_of_target(<target>)` - Print the application sizes for all formats
+* `stm32_generate_binary_file(<target>)` - Generate the binary for the given target
 
 To use the following functions, include the `devices.cmake` file with the following line
 
@@ -154,7 +173,8 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 
 ## FreeRTOS
 
-[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. `FREERTOS_PATH` can be either the path to the whole [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release)
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. `FREERTOS_PATH` can be either the path to the whole [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release). You can supply `FREERTOS_PATH` as an environmental variable as well.
+
 Typical usage:
 
 ```
@@ -171,4 +191,23 @@ Other FreeRTOS libraries:
 * `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
 * `FreeRTOS::Timers` - timers (`timers.c`)
 * `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
+
+The STM32Cube packages can contain the FreeRTOS source package and a CMSIS RTOS and RTOS_V2
+implementation. You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS
+`RTOS` package. 
+
+Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
+
+```
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
+target_link_libraries(... CMSIS::STM32::H7::M7::RTOS)
+```
+
+The following targets are available in general:
+
+* `CMSIS::STM32::<Family>::RTOS`
+* `CMSIS::STM32::<Family>::RTOS_V2`
+
+For the multi-core architectures, you have to specify both family and core like specified in the
+example.
 
