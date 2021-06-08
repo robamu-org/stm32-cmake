@@ -52,7 +52,6 @@ function(stm32_print_size_of_target TARGET)
 endfunction()
 
 function(stm32_generate_binary_file TARGET)
-# Generate a binary file which allows flashing the STM32 board via drag-and-drop
     add_custom_command(
         TARGET ${TARGET}
         POST_BUILD
