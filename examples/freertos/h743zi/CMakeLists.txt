@@ -52,13 +52,5 @@ if(USE_CMSIS_RTOS)
     )
 endif()
 
-# Generate a binary file which allows flashing the STM32 board via drag-and-drop
-add_custom_command(
-	TARGET ${TARGET_NAME}
-	POST_BUILD
-	COMMAND echo Generating binary file ${CMAKE_PROJECT_NAME}.bin..
-	COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET_NAME}.elf ${TARGET_NAME}.bin
-)
-
 stm32_print_size_of_target(${TARGET_NAME})
-
+stm32_generate_binary_file(${TARGET_NAME})

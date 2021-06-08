@@ -51,6 +51,16 @@ function(stm32_print_size_of_target TARGET)
     )
 endfunction()
 
+function(stm32_generate_binary_file TARGET)
+# Generate a binary file which allows flashing the STM32 board via drag-and-drop
+    add_custom_command(
+        TARGET ${TARGET}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.bin
+        COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
+    )
+endfunction()
+
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)
     foreach(C_TYPE ${STM32_${FAMILY}_TYPES})
