@@ -35,7 +35,9 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 # Usage
 
 First of all you need to configure toolchain and library pathes using CMake varibles. 
-You can do this by passing values through command line during cmake run or by setting variables inside your CMakeLists.txt
+You can do this by passing values through command line during cmake run or by setting variables
+inside your CMakeLists.txt. You can also set pass these variables to CMake by setting them
+as environmental variables.
 
 ## Configuration
 
