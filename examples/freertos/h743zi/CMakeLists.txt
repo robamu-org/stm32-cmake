@@ -7,7 +7,7 @@ set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 option(USE_CMSIS_RTOS ON "Use CMSIS RTOS provided by Cube repository")
 
 # This must come before the project call!
-set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATHT}/cmake/stm32_gcc.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATH}/cmake/stm32_gcc.cmake)
 project(${TARGET_NAME} CXX C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
@@ -16,6 +16,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # stm32_print_devices_by_family(FAMILY H7)
 
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 REQUIRED)
+if(USE_CMSIS_RTOS)
+    find_package(CMSIS COMPONENTS RTOS REQUIRED)
+endif()
+
 find_package(HAL COMPONENTS STM32H7M7 STM32H743ZI RCC GPIO CORTEX REQUIRED)
 find_package(FreeRTOS COMPONENTS ARM_CM7 REQUIRED)
 
