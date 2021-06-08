@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.13)
 set(TARGET_NAME stm32-freertos)
 set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
+# Please note: When using CMSIS, it is recommended to use the FreeRTOS version supplied in the 
+# Cube repository because more recent kernels might be incompatible
+option(USE_CMSIS_RTOS ON "Use CMSIS RTOS provided by Cube repository")
+
 # This must come before the project call!
 set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATHT}/cmake/stm32_gcc.cmake)
 project(${TARGET_NAME} CXX C ASM)
@@ -38,6 +42,12 @@ target_link_libraries(stm32-freertos PRIVATE
     STM32::NoSys
 )
 
+if(USE_CMSIS_RTOS)
+    target_link_libraries(stm32-freertos PRIVATE
+        CMSIS::STM32::H7::M7::RTOS
+    )
+endif()
+
 # Generate a binary file which allows flashing the STM32 board via drag-and-drop
 add_custom_command(
 	TARGET ${TARGET_NAME}
@@ -45,3 +55,6 @@ add_custom_command(
 	COMMAND echo Generating binary file ${CMAKE_PROJECT_NAME}.bin..
 	COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET_NAME}.elf ${TARGET_NAME}.bin
 )
+
+stm32_print_size_of_target(${TARGET_NAME})
+
