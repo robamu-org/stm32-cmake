@@ -45,7 +45,7 @@ as environmental variables.
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
 
-## <a id=cmsis"></a> Common usage
+## <a id="cmsis"></a> Common usage
 
 First thing that you need to do after toolchain configuration in your `CMakeLists.txt` script is to find CMSIS package:
 ```cmake
@@ -91,7 +91,7 @@ The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`
 If you want to use C++ on MCUs with little flash, you might instead want to link the newlib-nano to reduce the code size. You can do so by linking `STM32::Nano`, which will add the `--specs=nano.specs` flags to both compiler and linker.
 Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls, and you have to provide implementations for several OS interfacing functions (_sbrk, _close, _fstat, and others).
 
-## <a id=hal"></a> HAL
+## <a id="hal"></a> HAL
 
 STM32 HAL can be used similar to CMSIS.
 ```cmake
@@ -126,7 +126,7 @@ target_link_libraries(${TARGET_NAME}
 
 Here is another usage for a H7 device with the M7 core:
 
-```
+```cmake
 target_link_libraries(${TARGET_NAME} PRIVATE
     HAL::STM32::H7::M7::RCC
     HAL::STM32::H7::M7::GPIO
@@ -138,7 +138,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 
 ### Building
 
-```
+```sh
 cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
 cmake --build .
 ```
@@ -161,7 +161,7 @@ CMSIS package will generate linker script for your device automatically (target
 
 To use the following functions, include the `devices.cmake` file with the following line
 
-```
+```cmake
 include(${STM32_CMAKE_PATH}/cmake/stm32/devices.cmake)
 ```
 
@@ -226,7 +226,7 @@ The following targets are available in general:
 For the multi-core architectures, you have to specify both family and core like specified in the
 example.
 
-## <a id=lwip"></a> LwIP
+## <a id="lwip"></a> LwIP
 
 [cmake/FindLwIP](cmake/FindLwIP) - finds LwIP sources in STM32Cube repository and format them
 as `IMPORTED` targets. You should should have a `lwipopts.h` in the application includes
