@@ -45,7 +45,7 @@ as environmental variables.
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
 
-## Common usage
+## <a id="cmsis"></a> Common usage
 
 First thing that you need to do after toolchain configuration in your `CMakeLists.txt` script is to find CMSIS package:
 ```cmake
@@ -91,13 +91,15 @@ The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`
 If you want to use C++ on MCUs with little flash, you might instead want to link the newlib-nano to reduce the code size. You can do so by linking `STM32::Nano`, which will add the `--specs=nano.specs` flags to both compiler and linker.
 Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls, and you have to provide implementations for several OS interfacing functions (_sbrk, _close, _fstat, and others).
 
-## HAL
+## <a id="hal"></a> HAL
 
 STM32 HAL can be used similar to CMSIS.
+
 ```cmake
 find_package(HAL [HAL_version] COMPONENTS STM32F4 REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 ```
+
 *`CMAKE_INCLUDE_CURRENT_DIR` here because HAL requires `stm32<family>xx_hal_conf.h` file being in include headers path.*
 
 [HAL_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiple STM32 families are requested.
@@ -114,8 +116,8 @@ HAL module will search all drivers supported by family and create the following 
 Here is typical usage for a F4 device:
 
 ```cmake
-add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
-target_link_libraries(stm32-blinky-f4 
+add_executable(${TARGET_NAME} blinky.c stm32f4xx_hal_conf.h)
+target_link_libraries(${TARGET_NAME}
     HAL::STM32::F4::RCC
     HAL::STM32::F4::GPIO
     HAL::STM32::F4::CORTEX
@@ -126,8 +128,8 @@ target_link_libraries(stm32-blinky-f4
 
 Here is another usage for a H7 device with the M7 core:
 
-```
-target_link_libraries(stm32-freertos PRIVATE
+```cmake
+target_link_libraries(${TARGET_NAME} PRIVATE
     HAL::STM32::H7::M7::RCC
     HAL::STM32::H7::M7::GPIO
     HAL::STM32::H7::M7::CORTEX
@@ -138,9 +140,9 @@ target_link_libraries(stm32-freertos PRIVATE
 
 ### Building
 
-```
-    $ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
-    $ make
+```sh
+cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
+cmake --build .
 ```
 
 You can also ommit the `-DCMAKE_TOOLCHAIN_FILE` argument and use `set (CMAKE_TOOLCHAIN_FILE ...)`
@@ -148,7 +150,9 @@ in your `CMakeLists.txt` file
 
 ## Linker script & variables
 
-CMSIS package will generate linker script for your device automatically (target `CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use `stm32_add_linker_script` function.
+CMSIS package will generate linker script for your device automatically (target
+`CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use the
+`stm32_add_linker_script` function.
 
 ## Useful CMake functions
 
@@ -159,7 +163,7 @@ CMSIS package will generate linker script for your device automatically (target 
 
 To use the following functions, include the `devices.cmake` file with the following line
 
-```
+```cmake
 include(${STM32_CMAKE_PATH}/cmake/stm32/devices.cmake)
 ```
 
@@ -172,9 +176,9 @@ where `STM32_CMAKE_PATH` is the path to the `stm32-cmake` repository.
 
 stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in the embedded world.
 
-## FreeRTOS
+## <a id="freertos"></a> FreeRTOS
 
-[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
 `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets.
 `FREERTOS_PATH` can be either the path to the whole 
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
@@ -185,7 +189,10 @@ Typical usage:
 
 ```cmake
 find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
-target_link_libraries(... FreeRTOS::ARM_CM4F)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM4F
+)
 ```
 
 The following FreeRTOS ports are supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
@@ -204,9 +211,13 @@ implementation. You can specify to use CMSIS with a `CMSIS` target and by findin
 
 Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 
-```
+```cmake
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
-target_link_libraries(... CMSIS::STM32::H7::M7::RTOS)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+	FreeRTOS::ARM_CM7
+    CMSIS::STM32::H7::M7::RTOS
+)
 ```
 
 The following targets are available in general:
@@ -217,3 +228,29 @@ The following targets are available in general:
 For the multi-core architectures, you have to specify both family and core like specified in the
 example.
 
+## <a id="lwip"></a> LwIP
+
+[cmake/FindLwIP](cmake/FindLwIP.cmake) - finds LwIP sources in STM32Cube repository and format them
+as `IMPORTED` targets. You should should have a `lwipopts.h` in the application includes
+for this to work. If you want to use the Netconn or Socket API, you need to link against
+the CMSIS support like specified in the [FreeRTOS section](#freertos).
+
+Available LwIP libraries:
+
+* `LwIP::IPv4` - IPv4 support
+* `LwIP::IPv6` - IPv6 support
+* `LwIP::SYS` - System support (`sys_arch.c`)
+* `LwIP::API` - Support for Netconn and Socket API. Will also link `LwIP::SYS` automatically
+* `LwIP::NETIF` - Netif sources support
+
+Typical usage when using Raw API to implement a simple UDP echoserver
+
+```cmake
+find_package(LwIP REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    LwIP
+	LwIP::IPv4
+	LwIP::NETIF
+)
+```
