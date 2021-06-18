@@ -94,10 +94,12 @@ Keep in mind that when using `STM32::Nano`, by default you cannot use floats in 
 ## <a id="hal"></a> HAL
 
 STM32 HAL can be used similar to CMSIS.
+
 ```cmake
 find_package(HAL [HAL_version] COMPONENTS STM32F4 REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 ```
+
 *`CMAKE_INCLUDE_CURRENT_DIR` here because HAL requires `stm32<family>xx_hal_conf.h` file being in include headers path.*
 
 [HAL_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiple STM32 families are requested.
@@ -176,7 +178,7 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 
 ## <a id="freertos"></a> FreeRTOS
 
-[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
 `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets.
 `FREERTOS_PATH` can be either the path to the whole 
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
@@ -228,7 +230,7 @@ example.
 
 ## <a id="lwip"></a> LwIP
 
-[cmake/FindLwIP](cmake/FindLwIP) - finds LwIP sources in STM32Cube repository and format them
+[cmake/FindLwIP](cmake/FindLwIP.cmake) - finds LwIP sources in STM32Cube repository and format them
 as `IMPORTED` targets. You should should have a `lwipopts.h` in the application includes
 for this to work. If you want to use the Netconn or Socket API, you need to link against
 the CMSIS support like specified in the [FreeRTOS section](#freertos).
