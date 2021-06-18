@@ -1,17 +1,6 @@
-if((NOT STM32_HAL_${FAMILY}_PATH) AND (NOT STM32_CUBE_${FAMILY}_PATH))
-    set(STM32_CUBE_${FAMILY}_PATH $ENV{STM32_CUBE_${FAMILY}_PATH} CACHE PATH "Path to STM32Cube${FAMILY}")
-endif()
-
-if((NOT STM32_HAL_${FAMILY}_PATH) AND (NOT STM32_CUBE_${FAMILY}_PATH))
-    set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube${FAMILY} CACHE PATH "Path to STM32Cube${FAMILY}")
-    message(STATUS 
-        "Neither STM32_CUBE_${FAMILY}_PATH nor STM32_HAL_${FAMILY}_PATH specified, "
-        "using default STM32_CUBE_${FAMILY}_PATH: ${STM32_CUBE_${FAMILY}_PATH}"
-    )
-endif()
-
-message(STATUS "${STM32_CUBE_${FAMILY}_PATH}/Middlewares/Third_Party/LwIP")
-
+# If NO_SYS is set to 0 and the Netconn or Socket API is used, the user should link against
+# the CMSIS RTOS or RTOS_V2 support because the sys_arch.c LwIP OS port layer makes use of
+# CMSIS calls.
 find_path(LwIP_ROOT
     NAMES CMakeLists.txt
     PATHS "${STM32_CUBE_${FAMILY}_PATH}/Middlewares/Third_Party/LwIP"
@@ -42,6 +31,7 @@ endif()
 
 if(IS_DIRECTORY "${LwIP_ROOT}/system")
     set(LwIP_SYS_INCLUDE_DIR "${LwIP_ROOT}/system")
+    set(LwIP_SYS_SOURCES "${LwIP_ROOT}/system/OS/sys_arch.c")
 else()
     message(WARNING "LwIP system include directory not found. Build might fail")
 endif()
@@ -52,7 +42,17 @@ include("${LwIP_SOURCE_PATH}/Filelists.cmake")
 if(NOT (TARGET LwIP))
     add_library(LwIP INTERFACE IMPORTED)
     target_sources(LwIP INTERFACE ${lwipcore_SRCS})
-    target_include_directories(LwIP INTERFACE ${LwIP_INCLUDE_DIR} ${LwIP_SYS_INCLUDE_DIR})
+    target_include_directories(LwIP INTERFACE
+        ${LwIP_INCLUDE_DIR} ${LwIP_SYS_INCLUDE_DIR}
+    )
+endif()
+
+# Compile the system components which use CMSIS RTOS. This is necessary for the NETIF and Socket API
+# This target also requires that the application was linked against the CMSIS RTOS support
+if(NOT (TARGET LwIP::SYS))
+    add_library(LwIP::SYS INTERFACE IMPORTED)
+    target_sources(LwIP::SYS INTERFACE ${LwIP_SYS_SOURCES})
+    target_link_libraries(LwIP::SYS INTERFACE LwIP)
 endif()
 
 if(NOT (TARGET LwIP::IPv4))
@@ -70,7 +70,7 @@ endif()
 if(NOT (TARGET LwIP::API))
     add_library(LwIP::API INTERFACE IMPORTED)
     target_sources(LwIP::API INTERFACE ${lwipapi_SRCS})
-    target_link_libraries(LwIP::API INTERFACE LwIP)
+    target_link_libraries(LwIP::API INTERFACE LwIP::SYS)
 endif()
 
 if(NOT (TARGET LwIP::NETIF))
