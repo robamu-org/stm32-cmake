@@ -49,11 +49,10 @@ find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 
 function(stm32_print_size_of_target TARGET)
-    add_custom_command(
-       TARGET ${TARGET}
-       POST_BUILD
-       COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
-       COMMENT "Target Sizes: "
+    add_custom_target(${TARGET}_always_display_size
+        ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+        COMMENT "Target Sizes: "
+        DEPENDS ${TARGET}
     )
 endfunction()
 
@@ -259,11 +258,12 @@ function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
     endif()
 
     get_target_property(LINK_DEPENDS ${TARGET} ${INTERFACE_PREFIX}LINK_DEPENDS)
-    if(LINK_DEPENDS STREQUAL "LINK_DEPENDS-NOTFOUND")
-        set(LINK_DEPENDS "${SCRIPT}")
-    else()
+    if(LINK_DEPENDS)
         list(APPEND LINK_DEPENDS "${SCRIPT}")
+    else()
+        set(LINK_DEPENDS "${SCRIPT}")
     endif()
+
 
     set_target_properties(${TARGET} PROPERTIES ${INTERFACE_PREFIX}LINK_DEPENDS "${LINK_DEPENDS}")
 endfunction()
@@ -308,5 +308,4 @@ include(stm32/l0)
 include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
-
 
