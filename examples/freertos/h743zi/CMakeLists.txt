@@ -54,3 +54,4 @@ endif()
 
 stm32_print_size_of_target(${TARGET_NAME})
 stm32_generate_binary_file(${TARGET_NAME})
+stm32_generate_hex_file(${TARGET_NAME})
