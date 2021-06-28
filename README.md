@@ -192,7 +192,7 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 
 [cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
 `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets.
-`FREERTOS_PATH` can be either the path to the whole 
+`FREERTOS_PATH` can be either the path to the whole
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
 FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
 You can supply `FREERTOS_PATH` as an environmental variable as well.
@@ -219,7 +219,7 @@ Other FreeRTOS libraries:
 
 The STM32Cube packages can contain the FreeRTOS source package and a CMSIS RTOS and RTOS_V2
 implementation. You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS
-`RTOS` package. 
+`RTOS` package.
 
 Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 
@@ -227,7 +227,7 @@ Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE
     ...
-	FreeRTOS::ARM_CM7
+    FreeRTOS::ARM_CM7
     CMSIS::STM32::H7::M7::RTOS
 )
 ```
@@ -266,3 +266,4 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	LwIP::NETIF
 )
 ```
+
