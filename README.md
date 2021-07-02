@@ -169,6 +169,7 @@ CMSIS package will generate linker script for your device automatically (target
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
 * `stm32_print_size_of_target(<target>)` - Print the application sizes for all formats
 * `stm32_generate_binary_file(<target>)` - Generate the binary for the given target
+* `stm32_generate_hex_file(<target>)` - Generate the hex file for the given target
 
 To use the following functions, include the `devices.cmake` file with the following line
 
