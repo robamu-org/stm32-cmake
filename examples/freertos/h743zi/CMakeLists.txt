@@ -4,7 +4,7 @@ set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
 # Please note: When using CMSIS, it is recommended to use the FreeRTOS version supplied in the 
 # Cube repository because more recent kernels might be incompatible
-option(USE_CMSIS_RTOS ON "Use CMSIS RTOS provided by Cube repository")
+option(USE_CMSIS_RTOS "Use CMSIS RTOS provided by Cube repository" ON)
 
 # This must come before the project call!
 set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATH}/cmake/stm32_gcc.cmake)
