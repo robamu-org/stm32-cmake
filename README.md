@@ -30,6 +30,8 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * `fetch-cube` ([examples/fetch-cube](examples/fetch-cube)) - example of using FetchContent for fetching STM32Cube from ST's git.
 * `fetch-cmsis-hal` ([examples/fetch-cmsis-hal](examples/fetch-cmsis-hal)) - example of using FetchContent for fetching STM32 CMSIS and HAL from ST's git.
 * `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
+It will compile a project for the `F4` family by default, but you can also compile for the
+`L0` and `F1` family by passing `L0_EXAMPLE=ON` or `F1_EXAMPLE=ON` to the CMake generation call.
 * `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
 
 # Usage
@@ -168,7 +170,7 @@ CMSIS package will generate linker script for your device automatically (target
 * `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
 * `stm32_print_size_of_target(<target>)` - Print the application sizes for all formats
-* `stm32_generate_binary_file(<target>)` - Generate the binary for the given target
+* `stm32_generate_binary_file(<target>)` - Generate the binary file for the given target
 * `stm32_generate_hex_file(<target>)` - Generate the hex file for the given target
 
 To use the following functions, include the `devices.cmake` file with the following line
@@ -190,7 +192,7 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 
 [cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
 `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets.
-`FREERTOS_PATH` can be either the path to the whole 
+`FREERTOS_PATH` can be either the path to the whole
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
 FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
 You can supply `FREERTOS_PATH` as an environmental variable as well.
@@ -217,7 +219,7 @@ Other FreeRTOS libraries:
 
 The STM32Cube packages can contain the FreeRTOS source package and a CMSIS RTOS and RTOS_V2
 implementation. You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS
-`RTOS` package. 
+`RTOS` package.
 
 Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 
@@ -225,7 +227,7 @@ Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE
     ...
-	FreeRTOS::ARM_CM7
+    FreeRTOS::ARM_CM7
     CMSIS::STM32::H7::M7::RTOS
 )
 ```
@@ -264,3 +266,4 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	LwIP::NETIF
 )
 ```
+
