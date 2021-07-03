@@ -225,6 +225,7 @@ Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
 
 ```cmake
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
+find_package(FreeRTOS ARM_CM7 REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE
     ...
     FreeRTOS::ARM_CM7
@@ -232,7 +233,22 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 ```
 
-The following targets are available in general:
+You can also specify the namespace of the FreeRTOS port explicitely, which will cause the build
+system to look for CMSIS port files in the provided Cube repository path. If this is done,
+it is not necessary to specify  `FREERTOS_PATH` anymore. If you want to do this, you also need
+to pass the device family to the FreeRTOS components like this:
+
+```cmake
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
+find_package(FreeRTOS COMPONENTS ARM_CM7 STM32H7 REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::STM32::H7::M7::ARM_CM7
+    CMSIS::STM32::H7::M7::RTOS
+)
+```
+
+The following CMSIS targets are available in general:
 
 * `CMSIS::STM32::<Family>::RTOS`
 * `CMSIS::STM32::<Family>::RTOS_V2`
