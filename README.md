@@ -53,11 +53,16 @@ First thing that you need to do after toolchain configuration in your `CMakeList
 ```cmake
 find_package(CMSIS [CMSIS_version] COMPONENTS STM32F4 REQUIRED)
 ```
-You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit `COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and ALL chips (you'll need ALL STM32Cube packages somewhere).
+You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit
+`COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and
+ALL chips (you'll need ALL STM32Cube packages somewhere).
 
-[CMSIS_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiple STM32 families are requested.
+[CMSIS_version] is an optional version requirement. See
+[find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4).
+This parameter does not make sense if multiple STM32 families are requested.
 
-Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`.
+Each STM32 device can be categorized into family and device type groups, for example STM32F407VG
+is device from `F4` family, with type `F407xx`.
 
 ***Note**: Some devices in STM32H7 family have two different cores (Cortex-M7 and Cortex-M4).
 For those devices the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
@@ -69,7 +74,10 @@ CMSIS consists of three main components:
 * Device-specific linker scripts which requires information about memory sizes
 
 stm32-cmake uses modern CMake features notably imported targets and target properties.
-Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagate them as dependencies. So in a simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
+Every CMSIS component is CMake's target (aka library), which defines compiler definitions,
+compiler flags, include dirs, sources, etc. to build and propagate them as dependencies.
+So in a simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
+
 ```cmake
 add_executable(stm32-template main.c)
 target_link_libraries(stm32-template CMSIS::STM32::F407VG)
