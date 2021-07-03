@@ -33,6 +33,8 @@ if(NOT FREERTOS_PATH)
     set(FREERTOS_PATH $ENV{FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
 endif()
 
+message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
+
 macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     find_path(FreeRTOS_COMMON_INCLUDE
         NAMES FreeRTOS.h
