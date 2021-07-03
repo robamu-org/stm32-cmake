@@ -6,6 +6,9 @@ set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 # Cube repository because more recent kernels might be incompatible
 option(USE_CMSIS_RTOS "Use CMSIS RTOS provided by Cube repository" OFF)
 option(USE_CMSIS_RTOS_V2 "Use CMSIS RTOS_V2 provided by Cube repository" OFF)
+if(USE_CMSIS_RTOS AND USE_CMSIS_RTOS_V2)
+    message(FATAL_ERROR "Can not use USE_CMSIS_RTOS_V2 together with USE_CMSIS_RTOS!")
+endif()
 
 # This must come before the project call!
 set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATH}/cmake/stm32_gcc.cmake)

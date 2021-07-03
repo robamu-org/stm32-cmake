@@ -33,8 +33,6 @@ if(NOT FREERTOS_PATH)
     set(FREERTOS_PATH $ENV{FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
 endif()
 
-message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
-
 macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     find_path(FreeRTOS_COMMON_INCLUDE
         NAMES FreeRTOS.h
@@ -138,15 +136,16 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     endforeach()
 endmacro()
 
+message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
+
 if(NOT FreeRTOS_FIND_COMPONENTS_FAMILIES)
     if(NOT FREERTOS_PATH)
         set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
-        message(STATUS "No FREERTOS_PATH specified using default: ${FREERTOS_PATH}")
+        message(STATUS "No FREERTOS_PATH specified, using default: ${FREERTOS_PATH}")
     endif()
     stm32_find_freertos(FreeRTOS ${FREERTOS_PATH})
 else()
     message(STATUS "Search for FreeRTOS families: ${FreeRTOS_FIND_COMPONENTS_FAMILIES}")
-    message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
 
     foreach(COMP ${FreeRTOS_FIND_COMPONENTS_FAMILIES})
         string(TOLOWER ${COMP} COMP_L)
