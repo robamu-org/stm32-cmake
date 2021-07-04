@@ -195,7 +195,6 @@ where `STM32_CMAKE_PATH` is the path to the `stm32-cmake` repository.
 # Additional CMake modules
 
 stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in the embedded world.
-
 ## <a id="freertos"></a> FreeRTOS
 
 [cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
@@ -203,8 +202,32 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 `FREERTOS_PATH` can be either the path to the whole
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
 FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
+You can also supply `FREERTOS_PATH` to CMake by setting it as an environmental variable.
 
-Typical usage:
+You can either use the FreeRTOS kernel provided in the Cube repositories, or a separate
+FreeRTOS kernel. The Cube repository also provides the CMSIS RTOS and CMSIS RTOS V2 implementations.
+If you like to use the CMSIS implementations, it is recommended to also use the FreeRTOS sources
+provided in the Cube repository because the CMSIS port might be incompatible to newer kernel
+versions.
+
+You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS `RTOS` package.
+To select which FreeRTOS to use, you can find the package for a specific FreeRTOS port and then
+link against that port target within a specific namespace.
+
+Typical usage for a H7 device when using the M7 core, using an external kernel without CMSIS
+support. The FreeRTOS namespace is set to `FreeRTOS` and the `ARM_CM7` port is used:
+
+```cmake
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 REQUIRED)
+find_package(FreeRTOS ARM_CM7 REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM7
+)
+```
+
+Typical usage for a F4 device, using an external kernel without CMSIS support.
+The FreeRTOS namespace is set to `FreeRTOS` and the `ARM_CM4F` port is used:
 
 ```cmake
 find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
@@ -214,36 +237,8 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 ```
 
-The following FreeRTOS ports are supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
-
-Other FreeRTOS libraries:
-
-* `FreeRTOS::Coroutine` - co-routines (`croutines.c`)
-* `FreeRTOS::EventGroups` - event groups (`event_groups.c`)
-* `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
-* `FreeRTOS::Timers` - timers (`timers.c`)
-* `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
-
-The STM32Cube packages can contain the FreeRTOS source package and a CMSIS RTOS and RTOS_V2
-implementation. You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS
-`RTOS` package.
-
-Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
-
-```cmake
-find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
-find_package(FreeRTOS ARM_CM7 REQUIRED)
-target_link_libraries(${TARGET_NAME} PRIVATE
-    ...
-    FreeRTOS::ARM_CM7
-    CMSIS::STM32::H7::M7::RTOS
-)
-```
-
-You can also specify the namespace of the FreeRTOS port explicitely, which will cause the build
-system to look for CMSIS port files in the provided Cube repository path. If this is done,
-it is not necessary to specify `FREERTOS_PATH` anymore. If you want to do this, you also need
-to pass the device family to the FreeRTOS components like this:
+Another typical usage using the FreeRTOS provided in the Cube repository and the CMSIS support.
+The FreeRTOS namespace is set to `FreeRTOS::STM32::<FAMILY>` and the `ARM_CM7` port is used:
 
 ```cmake
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
@@ -260,8 +255,23 @@ The following CMSIS targets are available in general:
 * `CMSIS::STM32::<Family>::RTOS`
 * `CMSIS::STM32::<Family>::RTOS_V2`
 
+The following additional FreeRTOS targets are available in general to use the FreeRTOS provided
+in the Cube repository
+
+* `FreeRTOS::STM32::<Family>`
+
 For the multi-core architectures, you have to specify both family and core like specified in the
-example.
+example above.
+
+The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+
+Other FreeRTOS libraries, with `FREERTOS_NAMESPACE` being set as specified in the examples above:
+
+* `${FREERTOS_NAMESPACE}::Coroutine` - co-routines (`croutines.c`)
+* `${FREERTOS_NAMESPACE}::EventGroups` - event groups (`event_groups.c`)
+* `${FREERTOS_NAMESPACE}::StreamBuffer` - stream buffer (`stream_buffer.c`)
+* `${FREERTOS_NAMESPACE}::Timers` - timers (`timers.c`)
+* `${FREERTOS_NAMESPACE}::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
 
 ## <a id="lwip"></a> LwIP
 
