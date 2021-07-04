@@ -243,7 +243,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 
 You can also specify the namespace of the FreeRTOS port explicitely, which will cause the build
 system to look for CMSIS port files in the provided Cube repository path. If this is done,
-it is not necessary to specify  `FREERTOS_PATH` anymore. If you want to do this, you also need
+it is not necessary to specify `FREERTOS_PATH` anymore. If you want to do this, you also need
 to pass the device family to the FreeRTOS components like this:
 
 ```cmake
