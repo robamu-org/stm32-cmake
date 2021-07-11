@@ -135,7 +135,7 @@ So, if you don't need the linker script or want to adapt it for your own needs, 
 only `CMSIS::STM32::<TYPE>` library and provide your own script using `stm32_add_linker_script`
 function
 
-***Note**: For H7 family, because of its multi-core architecture, all H7 targets also have a suffix (::M7 or ::M4).
+***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`,
 `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
@@ -146,9 +146,9 @@ reduce the code size. You can do so by linking `STM32::Nano`, which will add the
 `--specs=nano.specs` flags to both compiler and linker.
 Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls,
 and you have to provide implementations for several OS interfacing
-functions (`_sbrk`, `_close`, `_fstat`, and others). You can enable printf/scanf floating point
-support with newlib-nano by linking against `STM32::Nano::FloatPrint` and/or
-`STM32::Nano::FloatScan`. It is also possible to combine `STM32::Nano` and `STM32::NoSys`
+functions (`_sbrk`, `_close`, `_fstat`, and others). You can enable printf/scanf floating point support with
+newlib-nano by linking against `STM32::Nano::FloatPrint` and/or `STM32::Nano::FloatScan`.
+It is also possible to combine `STM32::Nano` and `STM32::NoSys`
 to have the benefits of reduced code size while not being forced to implement system calls.
 
 ## <a id="hal"></a> HAL
@@ -236,6 +236,7 @@ where `STM32_CMAKE_PATH` is the path to the `stm32-cmake` repository.
 # Additional CMake modules
 
 stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in the embedded world.
+
 ## <a id="freertos"></a> FreeRTOS
 
 [cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
@@ -340,4 +341,3 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	LwIP::NETIF
 )
 ```
-
