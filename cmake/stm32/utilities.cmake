@@ -11,11 +11,24 @@ function(stm32_util_create_family_targets FAMILY)
         message(FATAL_ERROR "Expected at most one core for family ${FAMILY}: ${CORES}")
     endif()
 
+    option(STM32_ENABLE_FAST_MATH "Add -ffast-math compiler flag" OFF)
+    option(STM32_NO_BUILTIN "Add -fno-builtin compiler flag" OFF)
+
     if(NOT (TARGET STM32::${FAMILY}${CORE_C}))
+        set(STM32_COMPILE_OPTIONS
+            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing
+        )
+        if(STM32_ENABLE_FAST_MATH)
+            list(APPEND STM32_COMPILE_OPTIONS -ffast-math)
+        endif()
+        if(STM32_NO_BUILTIN)
+            list(APPEND STM32_COMPILE_OPTIONS -fno-builtin)
+        endif()
+
         add_library(STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
         target_compile_options(STM32::${FAMILY}${CORE_C} INTERFACE 
             --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -ffast-math
+            ${STM32_COMPILE_OPTIONS}
             $<$<CONFIG:Debug>:-Og>
             $<$<CONFIG:Release>:-Os>
         )
