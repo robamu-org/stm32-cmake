@@ -11,32 +11,21 @@ function(stm32_util_create_family_targets FAMILY)
         message(FATAL_ERROR "Expected at most one core for family ${FAMILY}: ${CORES}")
     endif()
 
-    option(STM32_ENABLE_FAST_MATH "Add -ffast-math compiler flag" OFF)
-    option(STM32_NO_BUILTIN "Add -fno-builtin compiler flag" OFF)
-    option(STM32_NO_STRICT_ALIASING "Add -fno-strict-aliasing compiler flag" OFF)
-
     if(NOT (TARGET STM32::${FAMILY}${CORE_C}))
-        set(STM32_COMPILE_OPTIONS
-            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections
-        )
-        if(STM32_ENABLE_FAST_MATH)
-            list(APPEND STM32_COMPILE_OPTIONS -ffast-math)
-        endif()
-        if(STM32_NO_BUILTIN)
-            list(APPEND STM32_COMPILE_OPTIONS -fno-builtin)
-        endif()
-        if(STM32_NO_STRICT_ALIASING)
-            list(APPEND STM32_COMPILE_OPTIONS -fno-strict-aliasing)
-        endif()
-
         add_library(STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
+        # Set compiler flags for target
+        # -Wall: all warnings activated
+        # -ffunction-sections -fdata-sections: remove unused code
         target_compile_options(STM32::${FAMILY}${CORE_C} INTERFACE 
             --sysroot="${TOOLCHAIN_SYSROOT}"
-            ${STM32_COMPILE_OPTIONS}
+            -mthumb -Wall -ffunction-sections -fdata-sections
         )
+        # Set linker flags
+        # -mthumb: Generate thumb code
+        # -Wl,--gc-sections: Remove unused code
         target_link_options(STM32::${FAMILY}${CORE_C} INTERFACE 
             --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wl,--gc-sections
+            -mthumb -Wl,--gc-sections
         )
         target_compile_definitions(STM32::${FAMILY}${CORE_C} INTERFACE 
             STM32${FAMILY}
@@ -164,4 +153,3 @@ function(stm32_fetch_hal)
         set(STM32_HAL_${FAMILY}_PATH ${${HAL_NAME_L}_SOURCE_DIR} PARENT_SCOPE)
     endforeach()
 endfunction()
-
