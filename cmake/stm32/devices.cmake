@@ -1117,21 +1117,21 @@ set(STM32_ALL_DEVICES
 )
 
 # Store a list of devices into a given DEVICES list
-# Get list of all devices for H7 family: stm32_get_devices_by_family(DEVICES FAMILY H7)
-# Print all devices: stm32_get_devices_by_family(DEVICES)
-function(stm32_get_devices_by_family DEVICES)
+# Get list of all devices for H7 family: stm32_get_devices_by_family(STM_DEVICES FAMILY H7)
+# Get list of all devices: stm32_get_devices_by_family(STM_DEVICES)
+function(stm32_get_devices_by_family STM_DEVICES)
     set(ARG_OPTIONS "")
     set(ARG_SINGLE FAMILY)
     set(ARG_MULTIPLE "")
     cmake_parse_arguments(PARSE_ARGV 1 ARG "${ARG_OPTIONS}" "${ARG_SINGLE}" "${ARG_MULTIPLE}")
-    set(LIST ${STM32_ALL_DEVICES})
+    set(STM_DEVICE_LIST ${STM32_ALL_DEVICES})
     if(ARG_FAMILY)
-        list(FILTER LIST INCLUDE REGEX "^${ARG_FAMILY}")
+        list(FILTER STM_DEVICE_LIST INCLUDE REGEX "^${ARG_FAMILY}")
     endif()
-    if(NOT LIST)
+    if(NOT STM_DEVICE_LIST)
         message(WARNING "Device family ${ARG_FAMILY} unknown")
     endif()
-    set(${DEVICES} ${LIST} PARENT_SCOPE)
+    set(${STM_DEVICES} ${STM_DEVICE_LIST} PARENT_SCOPE)
 endfunction()
 
 # Print the devices for a given family. Example usage:
