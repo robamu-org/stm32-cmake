@@ -1101,7 +1101,10 @@ set(STM32_ALL_DEVICES
     MP153C
     MP157A
     MP157C
+    WB5MMG
     WB50CG
+    WB30CE
+    WB10CC
     WB55CC
     WB55CE
     WB55CG
@@ -1111,9 +1114,26 @@ set(STM32_ALL_DEVICES
     WB55VC
     WB55VE
     WB55VG
+    WB55VY
+    WB15CC
+    WB35CC
+    WB35CE
+    WL55CC
+    WL54CC
+    WL55JC
+    WL54JC
     WLE5J8
     WLE5JB
     WLE5JC
+    WLE5C8
+    WLE5CB
+    WLE5CC
+    WLE4J8
+    WLE4JB
+    WLE4JC
+    WLE4C8
+    WLE4CB
+    WLE4CC
 )
 
 # Store a list of devices into a given STM_DEVICES list.
@@ -1145,7 +1165,7 @@ function(stm32_get_devices_by_family STM_DEVICES)
         # No family argument, so get list of all devices
         set(RESULTING_DEV_LIST ${STM32_ALL_DEVICES})
     endif()
-    
+
     set(${STM_DEVICES} ${RESULTING_DEV_LIST} PARENT_SCOPE)
 endfunction()
 
@@ -1191,7 +1211,7 @@ endmacro()
 
 # Pretty printer to limit amount of list entries printed per line
 macro(stm32_pretty_print_dev_list FAMILIES STM_DEVICES)
-    if(${FAMILIES} MATCHES "all")
+    if(${FAMILIES} STREQUAL "all")
         message(STATUS  "Devices for all families")
     else()
         message(STATUS "Devices for ${FAMILIES} family")
@@ -1200,7 +1220,7 @@ macro(stm32_pretty_print_dev_list FAMILIES STM_DEVICES)
     foreach(STM_DEVICE ${STM_DEVICES})
         list(APPEND TMP_LIST ${STM_DEVICE})
         list(LENGTH TMP_LIST CURR_LEN)
-        if(CURR_LEN EQUAL 4)
+        if(CURR_LEN EQUAL 10)
             message(STATUS "${TMP_LIST}")
             set(TMP_LIST "")
         endif()

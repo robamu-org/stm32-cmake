@@ -3,11 +3,11 @@
 ![Tests](https://github.com/ObKo/stm32-cmake/workflows/Tests/badge.svg)
 
 This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. 
-It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 device families.
+It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 WB WL device families.
 
 ## Requirements
 
-* cmake >= 3.13
+* cmake >= 3.16
 * GCC toolchain with newlib (optional).
 * STM32Cube package for appropriate STM32 family.
 
@@ -44,10 +44,10 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 First of all you need to configure toolchain and library paths using CMake variables. There are
 generally three ways to do this:
 
-1. Pass the variables through command line during cmake run with passed to CMake with 
+1. Pass the variables through command line during cmake run with passed to CMake with
    `-D<VAR_NAME>=...`
 2. Set the variables inside your `CMakeLists.txt`
-3. Pass these variables to CMake by setting them as environmental variables. 
+3. Pass these variables to CMake by setting them as environmental variables.
 
 The most important set of variables which needs to be set can be found in the following section.
 
@@ -57,7 +57,7 @@ These configuration options need to be set for the build process to work properl
 
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
-   of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
+   of `F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
 
 These configuration variables are optional:
 
@@ -105,8 +105,9 @@ This parameter does not make sense if multiple STM32 families are requested.
 Each STM32 device can be categorized into family and device type groups, for example STM32F407VG
 is device from `F4` family, with type `F407xx`.
 
-***Note**: Some devices in STM32H7 family have two different cores (Cortex-M7 and Cortex-M4).
+***Note**: Some devices have two different cores (e.g. STM32H7 has Cortex-M7 and Cortex-M4).
 For those devices the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
+STM32WB is a multi-cores device even if the second core is not accessible by end user.
 
 CMSIS consists of three main components:
 
@@ -135,7 +136,7 @@ So, if you don't need the linker script or want to adapt it for your own needs, 
 only `CMSIS::STM32::<TYPE>` library and provide your own script using `stm32_add_linker_script`
 function
 
-***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
+***Note**: Because of some families multi-cores architecture, all targets also have a suffix (e.g. STM32H7 has ::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`,
 `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
@@ -171,7 +172,7 @@ HAL module will search all drivers supported by family and create the following 
 * `HAL::STM32::<FAMILY>::<DRIVER>Ex` (e.g. `HAL::STM32::F4::ADCEx`) - HAL Extension driver , depends on `HAL::STM32::<FAMILY>::<DRIVER>`
 * `HAL::STM32::<FAMILY>::LL_<DRIVER>` (e.g. `HAL::STM32::F4::LL_ADC`) - HAL LL (Low-Level) driver , depends on `HAL::STM32::<FAMILY>`
 
-***Note**: Targets for STM32H7 will look like `HAL::STM32::<FAMILY>::[M7|M4]`, `HAL::STM32::<FAMILY>::[M7|M4]::<DRIVER>`, etc.*
+***Note**: Targets for multi-cores devices will look like `HAL::STM32::<FAMILY>::<CORE>`, `HAL::STM32::<FAMILY>::<CORE>::<DRIVER>`, etc.*
 
 Here is typical usage for a F4 device:
 
@@ -224,10 +225,10 @@ CMSIS package will generate linker script for your device automatically (target
 
 In the following functions, you can also specify mutiple families.
 
-* `stm32_get_devices_by_family(STM_DEVICES [FAMILY <family>])` - return into `STM_DEVICES` all
-  supported devices by family (or all devices if `<family>` is empty)
-* `stm32_print_devices_by_family([FAMILY <family>])` - Print all supported devices by family
-  (or all devices if `<family>` is empty)
+* `stm32_get_devices_by_family(STM_DEVICES [FAMILY families...])` - return into `STM_DEVICES` all
+  supported devices by family (or all devices if `FAMILY` is omitted)
+* `stm32_print_devices_by_family([FAMILY families...])` - Print all supported devices by family
+  (or all devices if `FAMILY` is omitted)
 
 # Additional CMake modules
 
@@ -240,17 +241,20 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 `FREERTOS_PATH` can be either the path to the whole
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
 FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
-You can also supply `FREERTOS_PATH` to CMake by setting it as an environmental variable.
+`FREERTOS_PATH` can be supplied as an environmental variable as well.
 
-You can either use the FreeRTOS kernel provided in the Cube repositories, or a separate
+It is possible to either use the FreeRTOS kernel provided in the Cube repositories, or a separate
 FreeRTOS kernel. The Cube repository also provides the CMSIS RTOS and CMSIS RTOS V2 implementations.
-If you like to use the CMSIS implementations, it is recommended to also use the FreeRTOS sources
+If the CMSIS implementations is used, it is recommended to also use the FreeRTOS sources
 provided in the Cube repository because the CMSIS port might be incompatible to newer kernel
-versions.
+versions. The FreeRTOS port to use is specified as a `FreeRTOS` component. A list of available
+ports can be found below. If the FreeRTOS sources provided in the Cube repository are used, the
+device family also has to be specified as a component for the `FreeRTOS` package.
 
-You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS `RTOS` package.
-To select which FreeRTOS to use, you can find the package for a specific FreeRTOS port and then
-link against that port target within a specific namespace.
+CMSIS RTOS can be used by specifying a `CMSIS` target and by finding the CMSIS `RTOS` package.
+The following section will show a few example configurations for the H7 and F4 family.
+You can also find example code for the `H743ZI` and `F407VG` devices in the `examples`
+folder.
 
 Typical usage for a H7 device when using the M7 core, using an external kernel without CMSIS
 support. The FreeRTOS namespace is set to `FreeRTOS` and the `ARM_CM7` port is used:
@@ -276,7 +280,8 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 ```
 
 Another typical usage using the FreeRTOS provided in the Cube repository and the CMSIS support.
-The FreeRTOS namespace is set to `FreeRTOS::STM32::<FAMILY>` and the `ARM_CM7` port is used:
+The FreeRTOS namespace is set to `FreeRTOS::STM32::<FAMILY>`, the `ARM_CM7` port is used and
+the device family is specified as a `FreeRTOS` component with `STM32H7`:
 
 ```cmake
 find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
@@ -298,10 +303,11 @@ in the Cube repository
 
 * `FreeRTOS::STM32::<Family>`
 
-For the multi-core architectures, you have to specify both family and core like specified in the
+For the multi-core architectures, both family and core need to be specified like shown in the
 example above.
 
-The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`,
+`ARM_CM3_MPU`, `ARM_CM4_MPU`, `ARM_CM7_MPU`.
 
 Other FreeRTOS libraries, with `FREERTOS_NAMESPACE` being set as specified in the examples above:
 

@@ -1,6 +1,27 @@
-set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7)
+# For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
+set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7 ARM_CM4_MPU ARM_CM3_MPU ARM_CM7_MPU)
+
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
+endif()
+list(REMOVE_DUPLICATES FreeRTOS_FIND_COMPONENTS)
+
+if((NOT FREERTOS_PATH) AND (DEFINED ENV{FREERTOS_PATH}))
+    set(FREERTOS_PATH $ENV{FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
+    message(STATUS "ENV FREERTOS_PATH specified, using FREERTOS_PATH: ${FREERTOS_PATH}")
+endif()
+
+if(NOT FREERTOS_PATH)
+    set(DEFAULT_FREERTOS_PATH "/opt/FreeRTOS")
+    if(EXISTS ${DEFAULT_FREERTOS_PATH})
+        set(FREERTOS_PATH ${DEFAULT_FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
+        message(STATUS "No FREERTOS_PATH specified using default: ${DEFAULT_FREERTOS_PATH}")
+    else()
+        message(STATUS
+            "No FreeRTOS folder found at default location ${DEFAULT_FREERTOS_PATH}. "
+            "Leaving empty.."
+        )
+    endif()
 endif()
 
 if(STM32H7 IN_LIST FreeRTOS_FIND_COMPONENTS)
@@ -8,14 +29,26 @@ if(STM32H7 IN_LIST FreeRTOS_FIND_COMPONENTS)
     list(APPEND FreeRTOS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
 endif()
 
+if(STM32WB IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32WB)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32WB_M4)
+endif()
+
+if(STM32WL IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32WL)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32WL_M4 STM32WL_M0PLUS)
+endif()
+
+# This section fills the family and ports components list
 foreach(COMP ${FreeRTOS_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP)
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" FAMILY_COMP ${COMP})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" FAMILY_COMP ${COMP})
+    # Valid family component, so add it (e.g. STM32H7)
     if(CMAKE_MATCH_1)
         list(APPEND FreeRTOS_FIND_COMPONENTS_FAMILIES ${FAMILY_COMP})
         continue()
     endif()
-
+    # Was not a family component, so add it to the port list
     list(APPEND FreeRTOS_FIND_COMPONENTS_PORTS ${COMP})
 endforeach()
 
@@ -28,10 +61,6 @@ list(REMOVE_DUPLICATES FreeRTOS_FIND_COMPONENTS_PORTS)
 list(REMOVE_DUPLICATES FreeRTOS_FIND_COMPONENTS_FAMILIES)
 
 set(FreeRTOS_HEAPS 1 2 3 4 5)
-
-if(NOT FREERTOS_PATH)
-    set(FREERTOS_PATH $ENV{FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
-endif()
 
 macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     find_path(FreeRTOS_COMMON_INCLUDE
@@ -49,7 +78,7 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
 
     find_path(FreeRTOS_SOURCE_DIR
         NAMES tasks.c
-        PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
+        PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS"
         PATH_SUFFIXES  "Source"
         NO_DEFAULT_PATH
     )
@@ -139,10 +168,6 @@ endmacro()
 message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
 
 if(NOT FreeRTOS_FIND_COMPONENTS_FAMILIES)
-    if(NOT FREERTOS_PATH)
-        set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
-        message(STATUS "No FREERTOS_PATH specified, using default: ${FREERTOS_PATH}")
-    endif()
     stm32_find_freertos(FreeRTOS ${FREERTOS_PATH})
 else()
     message(STATUS "Search for FreeRTOS families: ${FreeRTOS_FIND_COMPONENTS_FAMILIES}")
@@ -151,7 +176,7 @@ else()
         string(TOLOWER ${COMP} COMP_L)
         string(TOUPPER ${COMP} COMP)
         
-        string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
+        string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
         
         if((NOT CMAKE_MATCH_1) AND (NOT CMAKE_MATCH_2))
             message(FATAL_ERROR "Unknown FreeRTOS component: ${COMP}")
